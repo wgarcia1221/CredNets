@@ -27,14 +27,10 @@ from random import choice
 # "min_cost":"1",
 # "max_cost":"1",
 
-#where is def_samples even used in the code
-# "def_samples":"100,10,1",
 # "price":"cost",
 
 # I definitely need this social network variable
 # "social_network":"ErdosRenyiGraph",
-
-#Can I pass a range into the JSON files because that's how that liquidity test works maybe I dont pass those in there
 
 # "num_banks":"0",
 # "prevent_zeros":"True"
@@ -182,6 +178,8 @@ def InitMatrices(params):
 	return matrices
 
 
+#
+
 def InitCrednet(matrices, params):
 	"""
 	The following parameters are required:
@@ -220,13 +218,13 @@ def InitLiqCredNet(matrices, params):
 
 	#the difference between these is how the p and the d are passed in to get the range for the edges for netwroek density
 	#why is this error here?
-	if (params["social_network"] == "ErdosRenyiGraph"){
+	if (params["social_network"] == "ErdosRenyiGraph"):
 		e = range(params["plow"], params["phigh"])
-	}
+	
 
-	if (params["social_network"] == "BarabasiAlbertGraph"){
+	if (params["social_network"] == "BarabasiAlbertGraph"):
 		d = range(params["dlow"], params["dhigh"])
-	}
+	
 	return CreditNetwork(nodes, edges)	
 	
 	# 2.
