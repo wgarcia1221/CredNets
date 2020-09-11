@@ -1,11 +1,45 @@
-from Graphs.Graphs import WeightedDirectedGraph, PathError
-import Graphs.GraphGenerators as GG
+from Graphs import WeightedDirectedGraph, PathError
+import GraphGenerators as GG
 from Strategies import AgentStrategies, BankPolicies
 
 from numpy import array, fill_diagonal
 import numpy.random as R
 from random import choice
 
+#Notes Section: 
+#1. Set up JSON configuration file from scratch
+#2. You want to map the number of nodes to a specific number
+#3. Rewrite init.CredNet in this file
+#4. Rewrite CN.simulateCreditNetwork also in this file
+# What do I need from the old configuration file? 
+#simulations per sample but what is a sample in this case?
+#This variable just seems to be the number of simulations
+# "sims_per_sample":100,
+# "events":"1000",
+# you can't run the init.Matrices without these three so you need them 
+# or will my credit net not pass these in. This is a good question to ask. 
+# The same goes for the min and max parameters passed 
+# "def_alpha":"1",
+# "def_beta":"19",
+# "rate_alpha":"2",
+# "min_value":"1",
+# "max_value":"2",
+# "min_cost":"1",
+# "max_cost":"1",
+
+#where is def_samples even used in the code
+# "def_samples":"100,10,1",
+# "price":"cost",
+
+# I definitely need this social network variable
+# "social_network":"ErdosRenyiGraph",
+
+#Can I pass a range into the JSON files because that's how that liquidity test works maybe I dont pass those in there
+
+# "num_banks":"0",
+# "prevent_zeros":"True"
+# WHAT DONT I NEED FROM THE JSON?
+# "bank_policy":"agents2_banks10",
 
 class CreditError(Exception):
 	def __init__(self):
@@ -107,6 +141,7 @@ def SimulateCreditNetwork(CN, params, DP, TR, BV, SC):
 		CN.removeNode(d)
 		del payoffs[d]
 
+	#events is used here but for what, it is used to determine agent strategy so that they don;t have the same strategy
 	m = R.multinomial(events, array(TR.flat))
 	l = TR.shape[0]
 	transactors = sum([[(i/l,i%l)]*m[i] for i in range(l**2)], [])
@@ -168,3 +203,32 @@ def InitCrednet(matrices, params):
 	return CreditNetwork(nodes, edges)
 
 
+def InitLiqCredNet(matrices, params):
+	#social network is passed into the json to determine which graph is being generated depending on the 
+	#simulation being run
+	#differentiate per experiment 
+	# 1.
+	nodes = params["nodes"]
+	n = len(params["strategies"])
+	social_network = getattr(GG, params["social_network"])(n)
+	AS = AgentStrategies(matrices, social_network, params)
+	
+	# I'm confused here 
+	edges = sum([AS.get_strategy(s)(agent) for agent,s in enumerate( \
+			params["strategies"])] + [BP.get_policy(params["bank_policy"])( \
+			bank) for bank in range(-params["num_banks"],0)], [])
+
+	#the difference between these is how the p and the d are passed in to get the range for the edges for netwroek density
+	#why is this error here?
+	if (params["social_network"] == "ErdosRenyiGraph"){
+		e = range(params["plow"], params["phigh"])
+	}
+
+	if (params["social_network"] == "BarabasiAlbertGraph"){
+		d = range(params["dlow"], params["dhigh"])
+	}
+	return CreditNetwork(nodes, edges)	
+	
+	# 2.
+
+	# 3.
