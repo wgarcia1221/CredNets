@@ -10,9 +10,7 @@
 		"plow":0.18,
 		"phigh":0.45,
 		"social_network":"ErdosRenyiGraph",
-	
 		"price":"cost",
-		"bank_policy":"agents2_banks10",
 		"num_banks":"0",
 		"prevent_zeros":"True"
 	}
