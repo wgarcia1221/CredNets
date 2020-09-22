@@ -9,7 +9,7 @@ from numpy.random import multinomial, uniform
 from numpy import zeros
 
 
-def ErdosRenyiGraph(n, p=0.05):
+def ErdosRenyiGraph(n, p):
 	"""Each possible edge is included with probability p."""
 	nodes = range(n)
 	edges = filter(lambda x: uniform(0,1) < p, combinations(nodes, 2))
