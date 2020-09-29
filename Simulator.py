@@ -6,14 +6,14 @@ from argparse import ArgumentParser
 import sys
 import json
 
-def read_json(json_folder):
-	with open(json_folder + "/simulation_spec.json") as f:
+def read_json(jsons):
+	with open(jsons + "/simulation_spec.json") as f:
 		simulator_input = json.load(f)
 	config = simulator_input["configuration"]
 	parameters = {}
 	parameters["role"] = simulator_input["assignment"].keys()[0]
 	parameters["strategies"] = simulator_input["assignment"].values()[0]
-	parameters["json_folder"] = json_folder
+	parameters["jsons"] = jsons
 	parameters["events"] = int(config["events"])
 	parameters["def_alpha"] = float(config["def_alpha"])
 	parameters["def_beta"] = float(config["def_beta"])
@@ -35,12 +35,12 @@ def read_json(json_folder):
 
 def parse_args():
 	parser = ArgumentParser()
-	parser.add_argument("json_folder", type=str)
+	parser.add_argument("jsons", type=str)
 	parser.add_argument("samples", type=int)
 	args = parser.parse_args()
-	parameters = read_json(args.json_folder)
+	parameters = read_json(args.jsons)
 	parameters["samples"] = args.samples
-	return parameters
+	return parameters#
 
 
 def run_simulator(parameters):
@@ -69,7 +69,7 @@ def write_payoffs(payoffs, parameters, obs_name):
 				0, "features":{"defaulted":1}})
 	payoff_json["features"] = {"defaults" : len(parameters["strategies"]) - \
 			len(payoffs)}
-	with open(parameters["json_folder"] + "/observation_" + obs_name + \
+	with open(parameters["jsons"] + "/observation_" + obs_name + \
 			".json", "w") as payoff_file:
 		json.dump(payoff_json, payoff_file, indent=2)
 

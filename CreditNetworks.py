@@ -6,6 +6,7 @@ from numpy import array, fill_diagonal
 import numpy.random as R
 from random import choice, random, randint, uniform
 
+
 #Notes Section: 
 #1. You want to map the number of nodes to a specific number
 #2. Rewrite init.CredNet in this file
@@ -15,6 +16,17 @@ from random import choice, random, randint, uniform
 # I definitely need this social network variable
 # "social_network":"ErdosRenyiGraph",
 
+from argparse import ArgumentParser
+import sys
+import json
+
+parser = ArgumentParser()
+parser.add_argument("json_file", type=str)
+args = parser.parse_args()
+
+with open(args.json_file) as f:
+	parameters = json.load(f)
+print(parameters)
 
 class CreditError(Exception):
 	def __init__(self):
@@ -132,32 +144,32 @@ def SimulateCreditNetwork(CN, params, DP, TR, BV, SC):
 	return payoffs
 
 
-# def InitMatrices(params):
-# 	"""
-# 	The following parameters are required:
-# 	nodes...a list with length = number of nodes in the credit network
-# 	def_alpha...alpha parameter for default probability beta-distribution
-# 	def_beta....beta parameter for default probability beta-distribution
-# 	rate_alpha..alpha parameter for transaction rate pareto-distribution
-# 	min_value...minimum for buy value uniform-distribution
-# 	max_value...maximum for buy value uniform-distribution
-# 	min_cost....minimum for sell cost uniform-distribution
-# 	max_cost....maximum for sell cost uniform-distribution
-# 	"""
-# 	n = len(params["nodes"])
-# 	matrices = dict()
-# 	matrices["DP"] = R.beta(params["def_alpha"], params["def_beta"], n)
-# 	matrices["TR"] = R.pareto(params["rate_alpha"], [n]*2)
-# 	fill_diagonal(matrices["TR"], 0)
-# 	matrices["TR"] /= matrices["TR"].sum()
-# 	matrices["BV"] = R.uniform(params["min_value"], params["max_value"], [n]*2)
-# 	fill_diagonal(matrices["BV"], 0)
-# 	matrices["SC"] = R.uniform(params["min_cost"], params["max_cost"], [n]*2)
-# 	fill_diagonal(matrices["SC"], 0)
-# 	return matrices
+def InitMatrices(parameters):
+	"""
+	The following parameters are required:
+	nodes...a list with length = number of nodes in the credit network
+	def_alpha...alpha parameter for default probability beta-distribution
+	def_beta....beta parameter for default probability beta-distribution
+	rate_alpha..alpha parameter for transaction rate pareto-distribution
+	min_value...minimum for buy value uniform-distribution
+	max_value...maximum for buy value uniform-distribution
+	min_cost....minimum for sell cost uniform-distribution
+	max_cost....maximum for sell cost uniform-distribution
+	"""
+	n = len(params["nodes"])
+	matrices = dict()
+	matrices["DP"] = R.beta(params["def_alpha"], params["def_beta"], n)
+	matrices["TR"] = R.pareto(params["rate_alpha"], [n]*2)
+	fill_diagonal(matrices["TR"], 0)
+	matrices["TR"] /= matrices["TR"].sum()
+	matrices["BV"] = R.uniform(params["min_value"], params["max_value"], [n]*2)
+	fill_diagonal(matrices["BV"], 0)
+	matrices["SC"] = R.uniform(params["min_cost"], params["max_cost"], [n]*2)
+	fill_diagonal(matrices["SC"], 0)
+	return matrices
 
 
-def InitCrednet(matrices, params):
+def InitCrednet(matrices, parameters):
 	"""
 	The following parameters are required:
 	strategies......list of strategies by which agents issue credit
@@ -176,61 +188,143 @@ def InitCrednet(matrices, params):
 	edges = sum([AS.get_strategy(s)(agent) for agent,s in enumerate( \
 			params["strategies"])] + [BP.get_policy(params["bank_policy"])( \
 			bank) for bank in range(-params["num_banks"],0)], [])
+	print(edges)
 	return CreditNetwork(nodes, edges)
 
+def SimulateLCN(CN):
+	#implement warm up 
+	window_size = 1000
+	epsilon = 0.002
+	success = []
+	while (abs(success[i] - success[i-1]) < epsilon):
+		for i in range(window_size):
+			success_count = 0 
+			total_transactions = 0 
+			success_rate = success_count / total_transactions
+			#choose node pair s,t
+			for :
+				for n in CN.nodes:
+			#check if path exists from s to t 
+			#I'm not sure if I need these but it seems that this call checks if there is a path
+					total_transactions += 1
+					try: 
+						# if yes route payment from s to t and modify edges along that path
+						#make payment modifies edge capacities
+						CN.routePayment(self, n, )
+						success_count += 1
+					except:
+						#else count transaction as a failure
+						pass
 
-def InitLiqCredNet(params):
+
+
+def InitLiqCredNet(parameters):
 	#social network is passed into the json to determine which graph is being generated depending on the 
 	#simulation being run
 	#differentiate per experiment 
 	
 	# for experiment 1 where network density is being tested 
-	if (params["experiment"] == 1):
-		num_nodes = params["nodes"]
-		nodes = range(1, num_nodes)
+	if (parameters["experiment"] == 1):
+		num_nodes = 200
+		plow = 0.18
+		phigh = 0.45
+		dlow = 18
+		dhigh = 45
+		nodes = range(-1, num_nodes)
 		#the difference between these is how the p and the d are passed in to get the range for the edges for netwroek density
 		#why is this error here?
-		if (params["social_network"] == "ErdosRenyiGraph"):
-			p = random.uniform(params["plow"], params["phigh"])
-			edges = (nodes - 1) * p
+		if (parameters["social_network"] == "ErdosRenyiGraph"):
+			p = random.uniform(plow, phigh)
+			num_edges = (nodes - 1) * p
+			edges = []
+			for i in range(num_edges):
+				edges += parameters["c"]
+			
 			#should create graph in question but I am not sure how to give it attributes that it needs
 			graph = GG.ErdosRenyiGraph(num_nodes, p)
 
-		if (params["social_network"] == "BarabasiAlbertGraph"):
-			d = random.randint(params["dlow"], params["dhigh"])
-			edges = 2 * d 
+		if (parameters["social_network"] == "BarabasiAlbertGraph"):
+			d = random.randint(dlow, dhigh)
+			num_edges = 2 * d 
+			edges = []
+			for i in range(num_edges):
+				edges += parameters["c"]
 			graph = GG.BarabasiAlbertGraph(num_nodes, d)
 		
 		return CreditNetwork(nodes, edges)
 	
 	# for experiment 2 where credit capacity is being tested:
-	elif (params["experiment"] == 2):
-		nodes = params["nodes"]
+	elif (parameters["experiment"] == 2):
+		nodes = range(-1, num_nodes)
 
-		if (params["social_network"] == "ErdosRenyiGraph"):
-			p = params["p"]
-			edges = (nodes - 1) * p
-	
+		if (parameters["social_network"] == "ErdosRenyiGraph"):
+			p = parameters["p"]
+			num_edges = (nodes - 1) * p
+			edges = []
+			for i in range(num_edges):
+				edges += parameters["c"]
 
-		if (params["social_network"] == "BarabasiAlbertGraph"):
-			d = params["d"]
-			edges = 2 * d 
+		if (parameters["social_network"] == "BarabasiAlbertGraph"):
+			d = parameters["d"]
+			num_edges = 2 * d 
+			edges = []
+			for i in range(num_edges):
+				edges += parameters["c"]
 
 		return CreditNetwork(nodes, edges)
 
 	# for experiment 3 where varying network size is being tested:
-	elif (params["experiment"] == 3):
-
-		if (params["social_network"] == "ErdosRenyiGraph"):
-			nodes = random.randint(params["nodesl"], params["nodesh"])
-			#There are two different experiments that determine what p is going 
-			#p1 = params["p"]
-			#p2 = random.uniform(params["plow"], params["phigh"])
+	elif (parameters["experiment"] == 3):
+		nodesl = 20
+		nodesh = 500
 		
-			#edges1 = (nodes - 1) * p1
-			#edges2 = (nodes - 1) * p2
+		if (parameters["social_network"] == "ErdosRenyiGraph"):
+			nodes = random.randint(nodesl, nodesh)
+			#There are two different experiments that determine what p is going 
+			p = params["p"]
+			num_edges = (nodes - 1) * p
+			edges = []
+			for i in range(num_edges):
+				edges += parameters["c"]
 		
 		if (params["social_network"] == "BarabasiAlbertGraph"):
 			d = params["d"]
-			edges = 2 * d 
+			num_edges = 2 * d 
+			edges = []
+			for i in range(num_edges):
+				edges += parameters["c"]
+
 	return CreditNetwork(nodes, edges)
+
+	elif (parameters["experiment"] == 4):
+		nodesl = 20
+		nodesh = 500
+
+		if (parameters["social_network"] == "ErdosRenyiGraph"):
+			nodes = random.randint(nodesl, nodesh)
+			
+			#There are two different experiments that determine what p is going 
+			p = random.uniform(params["plow"], params["phigh"])
+
+			num_edges = (nodes - 1) * p
+			edges = []
+			for i in range(num_edges):
+				edges += parameters["c"]
+		
+		if (params["social_network"] == "BarabasiAlbertGraph"):
+			d = params["d"]
+			num_edges = 2 * d
+			edges = []
+			for i in range(num_edges):
+				edges += parameters["c"]
+
+	return CreditNetwork(nodes, edges)
+
+def Test(parameters):
+	print(5)
+	read_json(jsons)
+	n = len(parameters["strategies"])
+	print(n)
+
+
+Test(parameters)
