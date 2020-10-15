@@ -6,16 +6,6 @@ from numpy import array, fill_diagonal
 import numpy.random as R
 from random import choice, random, randint, uniform
 
-
-#Notes Section: 
-#1. You want to map the number of nodes to a specific number
-#2. Rewrite init.CredNet in this file
-#3. Rewrite CN.simulateCreditNetwork also in this file
-#4. Rewrite init.Matrices
-
-# I definitely need this social network variable
-# "social_network":"ErdosRenyiGraph",
-
 from argparse import ArgumentParser
 import sys
 import json
@@ -193,28 +183,28 @@ def InitCrednet(matrices, parameters):
 
 def SimulateLCN(CN):
 	#implement warm up 
-	window_size = 1000
+	#I dont remember how to do this
+	window_size = parameters["steps"]	
 	epsilon = 0.002
 	success = []
-	while (abs(success[i] - success[i-1]) < epsilon):
-		for i in range(window_size):
-			success_count = 0 
-			total_transactions = 0 
-			success_rate = success_count / total_transactions
-			#choose node pair s,t
-			for :
-				for n in CN.nodes:
+	#should I load capacities here?
+
+	
+	for i in range(window_size):
+		success_count = 0 
+			#Do I need to randomly two nodes?
+			#how many times does this transaction need to be run? 
 			#check if path exists from s to t 
 			#I'm not sure if I need these but it seems that this call checks if there is a path
-					total_transactions += 1
-					try: 
-						# if yes route payment from s to t and modify edges along that path
-						#make payment modifies edge capacities
-						CN.routePayment(self, n, )
-						success_count += 1
-					except:
-						#else count transaction as a failure
-						pass
+		total_transactions += 1
+		try: 
+			# if yes route payment from s to t and modify edges along that path
+			CN.routePayment(CN, sender, receiver, amount)
+			success_count += 1
+		except:
+			#else count transaction as a failure
+			pass
+		success[i] = success_count/total_transactions
 
 
 
@@ -222,109 +212,77 @@ def InitLiqCredNet(parameters):
 	#social network is passed into the json to determine which graph is being generated depending on the 
 	#simulation being run
 	#differentiate per experiment 
-	
 	# for experiment 1 where network density is being tested 
-	if (parameters["experiment"] == 1):
-		num_nodes = 200
-		plow = 0.18
-		phigh = 0.45
-		dlow = 18
-		dhigh = 45
-		nodes = range(-1, num_nodes)
-		#the difference between these is how the p and the d are passed in to get the range for the edges for netwroek density
-		#why is this error here?
+	if (args.json_file == "E1.json"):
+		num_nodes = parameters["num_nodes"]
 		if (parameters["social_network"] == "ErdosRenyiGraph"):
-			p = random.uniform(plow, phigh)
-			num_edges = (nodes - 1) * p
-			edges = []
-			for i in range(num_edges):
-				edges += parameters["c"]
-			
-			#should create graph in question but I am not sure how to give it attributes that it needs
+			p = random.uniform(parameters["edge_probability_low"], parameters["edge_probability_high"])
 			graph = GG.ErdosRenyiGraph(num_nodes, p)
 
 		if (parameters["social_network"] == "BarabasiAlbertGraph"):
-			d = random.randint(dlow, dhigh)
-			num_edges = 2 * d 
-			edges = []
-			for i in range(num_edges):
-				edges += parameters["c"]
+			d = random.randint(parameters["edges_per_node_low"], parameters["edges_per_node_high"])
 			graph = GG.BarabasiAlbertGraph(num_nodes, d)
 		
-		return CreditNetwork(nodes, edges)
+		return CreditNetwork(graph.nodes, graph.edges)
 	
 	# for experiment 2 where credit capacity is being tested:
-	elif (parameters["experiment"] == 2):
-		nodes = range(-1, num_nodes)
-
+	elif (args.json_file == "E2.json"):
+		num_nodes = parameters["num_nodes"]
+		
 		if (parameters["social_network"] == "ErdosRenyiGraph"):
-			p = parameters["p"]
-			num_edges = (nodes - 1) * p
-			edges = []
-			for i in range(num_edges):
-				edges += parameters["c"]
+			p = parameters["edge_probability"]
+			graph = GG.ErdosRenyiGraph(num_nodes, p)
 
 		if (parameters["social_network"] == "BarabasiAlbertGraph"):
 			d = parameters["d"]
-			num_edges = 2 * d 
-			edges = []
-			for i in range(num_edges):
-				edges += parameters["c"]
-
-		return CreditNetwork(nodes, edges)
+			graph = GG.BarabasiAlbertGraph(num_nodes, d)
+		
+		return CreditNetwork(graph.nodes, graph.edges)
 
 	# for experiment 3 where varying network size is being tested:
-	elif (parameters["experiment"] == 3):
-		nodesl = 20
-		nodesh = 500
+	elif (args.json_file == "E3A.json"):
 		
 		if (parameters["social_network"] == "ErdosRenyiGraph"):
-			nodes = random.randint(nodesl, nodesh)
-			#There are two different experiments that determine what p is going 
+			num_nodes = random.randint(parameters["nodes_low"], parameters["nodes_high"])
 			p = params["p"]
-			num_edges = (nodes - 1) * p
-			edges = []
-			for i in range(num_edges):
-				edges += parameters["c"]
-		
-		if (params["social_network"] == "BarabasiAlbertGraph"):
-			d = params["d"]
-			num_edges = 2 * d 
-			edges = []
-			for i in range(num_edges):
-				edges += parameters["c"]
+			graph = GG.ErdosRenyiGraph(num_nodes, p)
 
-	return CreditNetwork(nodes, edges)
+		if (parameters["social_network"] == "BarabasiAlbertGraph"):
+			d = parameters["d"]
+			graph = GG.BarabasiAlbertGraph(num_nodes, d)
 
-	elif (parameters["experiment"] == 4):
-		nodesl = 20
-		nodesh = 500
+	return CreditNetwork(graph.nodes, graph.edges)
 
+	elif (args.json_file == "E3B.json"):
 		if (parameters["social_network"] == "ErdosRenyiGraph"):
-			nodes = random.randint(nodesl, nodesh)
-			
+			num_nodes = random.randint(parameters["nodes_low"], parameters["nodes_high"])
 			#There are two different experiments that determine what p is going 
-			p = random.uniform(params["plow"], params["phigh"])
-
-			num_edges = (nodes - 1) * p
-			edges = []
-			for i in range(num_edges):
-				edges += parameters["c"]
+			p = 1 / (num_nodes / 10)
+			graph = GG.ErdosRenyiGraph(num_nodes, p)
 		
-		if (params["social_network"] == "BarabasiAlbertGraph"):
-			d = params["d"]
-			num_edges = 2 * d
-			edges = []
-			for i in range(num_edges):
-				edges += parameters["c"]
+		if (parameters["social_network"] == "BarabasiAlbertGraph"):
+			d = parameters["d"]
+			graph = GG.BarabasiAlbertGraph(num_nodes, d)
 
-	return CreditNetwork(nodes, edges)
+	return CreditNetwork(graph.nodes, graph.edges)
 
-def Test(parameters):
-	print(5)
-	read_json(jsons)
-	n = len(parameters["strategies"])
-	print(n)
+# def test(parameters):
+# 	print(5)
+# 	n = len(parameters["strategies"])
+# 	print(n)
 
+def main():
+	
+# 	data = []
+# 	parameters = parse_args()
+# 	for i in range(1, parameters["runs"]):
+# 		#run and compute average and standard deviation of steady state success probability
+# 		success = simulateLCN(CN)
+# 		data += success
+# 	avg = sum(data)/len(data)
+# 	stdev = np.std(data)
+# 	print("The average in success rate over 100 runs is" + str(avg))
+# 	print("The standard deviation in success rate over 100 runs is" + str(stdev))
 
-Test(parameters)
+# test(parameters)
+	main()

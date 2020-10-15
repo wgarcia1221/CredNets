@@ -40,7 +40,7 @@ def parse_args():
 	args = parser.parse_args()
 	parameters = read_json(args.jsons)
 	parameters["samples"] = args.samples
-	return parameters#
+	return parameters
 
 
 def run_simulator(parameters):

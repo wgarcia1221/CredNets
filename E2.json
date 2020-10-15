@@ -1,0 +1,10 @@
+{
+    "runs":100,
+	"steps":1000,
+    "nodes":100,
+    "capacity_low": 1,
+    "capacity_high": 10,
+    "edges_per_node": 5,
+    "edge_probability": 0.10,	
+	"social_network":"ErdosRenyiGraph"
+}

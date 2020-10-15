@@ -15,7 +15,6 @@ def ErdosRenyiGraph(n, p):
 	edges = filter(lambda x: uniform(0,1) < p, combinations(nodes, 2))
 	return UndirectedGraph(nodes, edges)
 
-
 def BarabasiAlbertGraph(n, d):
 	"""Preferential atachment graph on n nodes; most nodes have degree >= d."""
 	nodes = range(n)
