@@ -2,9 +2,11 @@ from Graphs import WeightedDirectedGraph, PathError
 import GraphGenerators as GG
 from Strategies import AgentStrategies, BankPolicies
 
+import numpy as np
 from numpy import array, fill_diagonal
 import numpy.random as R
-from random import choice, random, randint, uniform
+from random import choice, random, randint, choices, sample
+from random import uniform
 
 from argparse import ArgumentParser
 import sys
@@ -15,14 +17,12 @@ parser.add_argument("json_file", type=str)
 args = parser.parse_args()
 
 with open(args.json_file) as f:
-	parameters = json.load(f)
+	parameters= json.load(f)
 print(parameters)
 
 class CreditError(Exception):
 	def __init__(self):
-		Exception.__init__(self, 'insufficient credit')
-
-
+		Exception.__init__(self, 'insufficient credit')	
 class CreditNetwork(WeightedDirectedGraph):
 	def __init__(self, nodes=[], weightedEdges=[]):
 		WeightedDirectedGraph.__init__(self, nodes, weightedEdges)
@@ -181,31 +181,31 @@ def InitCrednet(matrices, parameters):
 	print(edges)
 	return CreditNetwork(nodes, edges)
 
-def SimulateLCN(CN):
-	#implement warm up 
-	#I dont remember how to do this
-	window_size = parameters["steps"]	
-	epsilon = 0.002
-	success = []
-	#should I load capacities here?
-
-	
+def simulateLCN(CN):
+	#window_size = parameters["steps"]	
+	window_size = 150 
+	warmup = 50
+	success = [None] * window_size
+	#should I load capacities here?	
+	for i in range(warmup):
+		pass
+	#print(CN.nodes)
+	#print(CN.edges)
+	success_count = 0 
+	total_transactions = 0
 	for i in range(window_size):
-		success_count = 0 
-			#Do I need to randomly two nodes?
-			#how many times does this transaction need to be run? 
-			#check if path exists from s to t 
-			#I'm not sure if I need these but it seems that this call checks if there is a path
 		total_transactions += 1
 		try: 
+			source, destination = sample(CN.nodes, k = 2)
 			# if yes route payment from s to t and modify edges along that path
-			CN.routePayment(CN, sender, receiver, amount)
+			CN.routePayment(source, destination, 1)
 			success_count += 1
-		except:
+		except CreditError:
 			#else count transaction as a failure
 			pass
-		success[i] = success_count/total_transactions
-
+	success = success_count/total_transactions
+	#print(success)
+	return success
 
 
 def InitLiqCredNet(parameters):
@@ -214,20 +214,23 @@ def InitLiqCredNet(parameters):
 	#differentiate per experiment 
 	# for experiment 1 where network density is being tested 
 	if (args.json_file == "E1.json"):
-		num_nodes = parameters["num_nodes"]
+		num_nodes = parameters["nodes"]
 		if (parameters["social_network"] == "ErdosRenyiGraph"):
-			p = random.uniform(parameters["edge_probability_low"], parameters["edge_probability_high"])
+			p = np.random.uniform(parameters["edge_probability_low"], parameters["edge_probability_high"])
 			graph = GG.ErdosRenyiGraph(num_nodes, p)
 
 		if (parameters["social_network"] == "BarabasiAlbertGraph"):
 			d = random.randint(parameters["edges_per_node_low"], parameters["edges_per_node_high"])
 			graph = GG.BarabasiAlbertGraph(num_nodes, d)
 		
-		return CreditNetwork(graph.nodes, graph.edges)
+		#directed = GG.DirectedGraph(graph.nodes, graph.edges)
+		#creditnetwork = CreditNetwork(graph.nodes, graph.edges)
+		CN = GG.AddWeights(graph)
+		return CreditNetwork(CN.nodes, CN.allEdges())
 	
 	# for experiment 2 where credit capacity is being tested:
 	elif (args.json_file == "E2.json"):
-		num_nodes = parameters["num_nodes"]
+		num_nodes = parameters["nodes"]
 		
 		if (parameters["social_network"] == "ErdosRenyiGraph"):
 			p = parameters["edge_probability"]
@@ -237,21 +240,29 @@ def InitLiqCredNet(parameters):
 			d = parameters["d"]
 			graph = GG.BarabasiAlbertGraph(num_nodes, d)
 		
-		return CreditNetwork(graph.nodes, graph.edges)
+
+		#directed = GG.DirectedGraph(graph.nodes, graph.edges)
+		#creditnetwork = CreditNetwork(graph.nodes, graph.edges)
+		CN = GG.AddWeightsProb(graph, parameters["capacity_low"], parameters["capacity_high"])
+		return CN
+		
 
 	# for experiment 3 where varying network size is being tested:
 	elif (args.json_file == "E3A.json"):
 		
 		if (parameters["social_network"] == "ErdosRenyiGraph"):
 			num_nodes = random.randint(parameters["nodes_low"], parameters["nodes_high"])
-			p = params["p"]
+			p = parameters["p"]
 			graph = GG.ErdosRenyiGraph(num_nodes, p)
 
 		if (parameters["social_network"] == "BarabasiAlbertGraph"):
 			d = parameters["d"]
 			graph = GG.BarabasiAlbertGraph(num_nodes, d)
 
-	return CreditNetwork(graph.nodes, graph.edges)
+		#directed = GG.DirectedGraph(graph.nodes, graph.edges)
+		#creditnetwork = CreditNetwork(graph.nodes, graph.edges)
+		CN= GG.AddWeights(graph)
+		return CN
 
 	elif (args.json_file == "E3B.json"):
 		if (parameters["social_network"] == "ErdosRenyiGraph"):
@@ -264,7 +275,11 @@ def InitLiqCredNet(parameters):
 			d = parameters["d"]
 			graph = GG.BarabasiAlbertGraph(num_nodes, d)
 
-	return CreditNetwork(graph.nodes, graph.edges)
+		#directed = GG.DirectedGraph(graph.nodes, graph.edges)
+		#creditnetwork = CreditNetwork(graph.nodes, graph.edges)
+		CN= GG.AddWeights(graph)
+		return CN
+		
 
 # def test(parameters):
 # 	print(5)
@@ -272,17 +287,18 @@ def InitLiqCredNet(parameters):
 # 	print(n)
 
 def main():
-	
-# 	data = []
-# 	parameters = parse_args()
-# 	for i in range(1, parameters["runs"]):
-# 		#run and compute average and standard deviation of steady state success probability
-# 		success = simulateLCN(CN)
-# 		data += success
-# 	avg = sum(data)/len(data)
-# 	stdev = np.std(data)
-# 	print("The average in success rate over 100 runs is" + str(avg))
-# 	print("The standard deviation in success rate over 100 runs is" + str(stdev))
+	runs = parameters["runs"]
+	data = []
+	CN = InitLiqCredNet(parameters)
+	for i in range(1, runs):
+		#run and compute average and standard deviation of steady state success probability
+		success = simulateLCN(CN)
+		data.append(success)
+	#print(data)
+	avg = sum(data)/len(data) * 100
+	stdev = np.std(data) * 100
+	print("The average in success rate over 100 runs is " + str(avg))
+	print("The standard deviation in success rate over 100 runs is " + str(stdev))
 
 # test(parameters)
-	main()
+main()

@@ -1,7 +1,7 @@
 from Graphs import *
 
 from itertools import combinations
-from random import choice
+from random import choice, random, randint, uniform
 from sys import modules
 from functools import partial
 
@@ -126,4 +126,8 @@ def AddWeights(graph):
 	edges = [(e[0], e[1], 1) for e in graph.allEdges()]
 	return WeightedDirectedGraph(graph.nodes, edges)
 
+
+def AddWeightsProb(graph, edge_capacity_low, edge_capacity_high):
+	edges = [(e[0], e[1], random.randint(edge_capacity_low, edge_capacity_high)) for e in graph.allEdges()]
+	return WeightedDirectedGraph(graph.nodes, edges)
 

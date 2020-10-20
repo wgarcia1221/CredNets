@@ -144,7 +144,7 @@ class WeightedDirectedGraph(DirectedGraph):
 		del self.weights[(src, dst)]
 
 	def allEdges(self):
-		return [(src, dst, self.edgeWeight(src, dst)) for src, dst in \
+		return [(src, dst, self.weights[(src, dst)]) for src, dst in \
 				DirectedGraph.allEdges(self)]
 
 	def adjacencyMatrix(self):
