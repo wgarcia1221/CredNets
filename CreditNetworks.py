@@ -220,7 +220,7 @@ def InitLiqCredNet(parameters):
 			graph = GG.ErdosRenyiGraph(num_nodes, p)
 
 		if (parameters["social_network"] == "BarabasiAlbertGraph"):
-			d = random.randint(parameters["edges_per_node_low"], parameters["edges_per_node_high"])
+			d = randint(parameters["edges_per_node_low"], parameters["edges_per_node_high"])
 			graph = GG.BarabasiAlbertGraph(num_nodes, d)
 		
 		#directed = GG.DirectedGraph(graph.nodes, graph.edges)
@@ -244,15 +244,15 @@ def InitLiqCredNet(parameters):
 		#directed = GG.DirectedGraph(graph.nodes, graph.edges)
 		#creditnetwork = CreditNetwork(graph.nodes, graph.edges)
 		CN = GG.AddWeightsProb(graph, parameters["capacity_low"], parameters["capacity_high"])
-		return CN
+		return CreditNetwork(CN.nodes, CN.allEdges())
 		
 
 	# for experiment 3 where varying network size is being tested:
 	elif (args.json_file == "E3A.json"):
 		
 		if (parameters["social_network"] == "ErdosRenyiGraph"):
-			num_nodes = random.randint(parameters["nodes_low"], parameters["nodes_high"])
-			p = parameters["p"]
+			num_nodes = randint(parameters["nodes_low"], parameters["nodes_high"])
+			p = parameters["edge_probability"]
 			graph = GG.ErdosRenyiGraph(num_nodes, p)
 
 		if (parameters["social_network"] == "BarabasiAlbertGraph"):
@@ -262,11 +262,11 @@ def InitLiqCredNet(parameters):
 		#directed = GG.DirectedGraph(graph.nodes, graph.edges)
 		#creditnetwork = CreditNetwork(graph.nodes, graph.edges)
 		CN= GG.AddWeights(graph)
-		return CN
+		return CreditNetwork(CN.nodes, CN.allEdges())
 
 	elif (args.json_file == "E3B.json"):
 		if (parameters["social_network"] == "ErdosRenyiGraph"):
-			num_nodes = random.randint(parameters["nodes_low"], parameters["nodes_high"])
+			num_nodes = randint(parameters["nodes_low"], parameters["nodes_high"])
 			#There are two different experiments that determine what p is going 
 			p = 1 / (num_nodes / 10)
 			graph = GG.ErdosRenyiGraph(num_nodes, p)
@@ -278,7 +278,7 @@ def InitLiqCredNet(parameters):
 		#directed = GG.DirectedGraph(graph.nodes, graph.edges)
 		#creditnetwork = CreditNetwork(graph.nodes, graph.edges)
 		CN= GG.AddWeights(graph)
-		return CN
+		return CreditNetwork(CN.nodes, CN.allEdges())
 		
 
 # def test(parameters):

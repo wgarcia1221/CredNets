@@ -128,6 +128,6 @@ def AddWeights(graph):
 
 
 def AddWeightsProb(graph, edge_capacity_low, edge_capacity_high):
-	edges = [(e[0], e[1], random.randint(edge_capacity_low, edge_capacity_high)) for e in graph.allEdges()]
+	edges = [(e[0], e[1], randint(edge_capacity_low, edge_capacity_high)) for e in graph.allEdges()]
 	return WeightedDirectedGraph(graph.nodes, edges)
 

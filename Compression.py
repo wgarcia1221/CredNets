@@ -28,40 +28,76 @@ Default Cost Parameters represent the cost of
 '''
 #generate graph similar to the one in the video
 #three nodes in the graph
-n = 3
-graph = GG.EmptyGraph(n)
-#edge directions can be random
-graph2 = GG.RandomEdgeDirections(graph)
-#edges do need weights
-graph3 = GG.AddWeights(graph)
-graph3.addEdge(1,2,1)
-graph3.addEdge(1,0,4)
-graph3.addEdge(0,2,4)
-graph3.addEdge(1,2,2)
-graph3.addEdge(2,0,1)
-print(graph3.weights)
+graph = GG.WeightedDirectedGraph()
+#graph from example but still have to give nodes a value attribute
+graph.addNode("A")
+#your node can be whatever you want so a tuple would work but an attribute
+#in the class would also work
+#add attribute to the node rather than passing in the node as a tuple 
+graph.addNode(("B", 2))
+graph.addNode("C")
+graph.addNode("D")
+graph.addNode("E")
+graph.addEdge("A","D",2)
+graph.addEdge("D","E",4)
+graph.addEdge("A",("B", 2),2)
+graph.addEdge(("B", 2),"C",2)
+graph.addEdge("C","A",2)
+
 #I need a function to see the graph or get info on the graphs and the edges
 def graphSummary(graph3):
     #how do I access edge weight?
-    print(graph3.edges)
-    print(graph3.nodes)
-    for e in graph.edges:
-        print("This is edge number " + str(e))
-    print("This is the set of nodes " + str(graph.nodes))
+    print(graph.weights)
+    print(graph.edges)
+    print(graph.nodes)
+
+# def findCycle(graph, node, visited, stack):
+#     # Mark current node as visited and  
+#         # adds to recursion stack 
+#         visited[node] = True
+#         stack[node] = True
+#         # Recur for all neighbours 
+#         # if any neighbour is visited and in  
+#         # recStack then graph is cyclic 
+#         for neighbour in graph.nodes[node]: 
+#             if visited[neighbour] == False: 
+#                 if graph.isCyclicUtil(neighbour, visited, stack) == True: 
+#                     return True
+#             elif stack[neighbour] == True: 
+#                 return True
+  
+#         # The node needs to be poped from  
+#         # recursion stack before function ends 
+#         stack[node] = False
+#         return False
+
+# # Returns true if graph is cyclic else false 
+# def isCyclic(graph): 
+#     visited = [False] * graph.edges
+#     stack = [False] * graph.edges
+#     for node in range(graph.nodes): 
+#         if visited[node] == False: 
+#             if graph.isCyclicUtil(node,visited,stack) == True: 
+#                 return True
+#     return False
 
 #function that compresses the graph
-def compressGraph(cycle, amount):
-    all_banks = True
-    if all_banks is True:
-        #compress the graph
-        for e in cycle.edges:
+# def compressGraph(cycle, amount):
+#     all_banks = True
+#     if all_banks is True:
+#         #compress the graph
+#         for e in cycle.edges:
             #cycle.weights.get() -= amount
             #return the graph after modifying edge weights
-            return cycle
+            #return cycle
     
     # if it does not get in if statement, you return the old graph
-    return cycle
+    #return cycle
 
-graphSummary(graph3)
-# compressGraph(graph, 1)
 # graphSummary(graph)
+# if isCyclic(graph) == 1: 
+#     print("Graph has a cycle")
+# else: 
+#     print("Graph has no cycle")
+# compressGraph(graph, 1)
+graphSummary(graph)
