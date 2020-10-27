@@ -1,7 +1,7 @@
 {
 	"runs":100,
 	"steps":1000,
-    "nodes":5,
+    "nodes":10,
 	"capacity": 1,
     "edges_per_node_low": 18,
     "edges_per_node_high": 45,
