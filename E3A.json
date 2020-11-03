@@ -1,8 +1,8 @@
 {
 	"runs":100,
 	"steps":1000,
-	"nodes_low":100,
-	"nodes_high":100,
+	"nodes_low":500,
+	"nodes_high":500,
 	"capacity": 1,
 	"edges_per_node": 10,
 	"edge_probability": 0.10,		

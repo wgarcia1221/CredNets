@@ -11,6 +11,7 @@ from random import uniform
 from argparse import ArgumentParser
 import sys
 import json
+import csv
 
 parser = ArgumentParser()
 parser.add_argument("json_file", type=str)
@@ -299,6 +300,13 @@ def main():
 	stdev = np.std(data) * 100
 	print("The average in success rate over 100 runs is " + str(avg))
 	print("The standard deviation in success rate over 100 runs is " + str(stdev))
+	return (avg, stdev)
 
 # test(parameters)
-main()
+#main()
+testruns = 20
+with open("CreditNetworkTest1: 500 NODES", "w") as csvfile:
+    for i in range(testruns):
+        test = main()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow([i , test[0], test[1]])
